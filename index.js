@@ -1,6 +1,6 @@
 const io = require("socket.io")(process.env.PORT || 8999, {
   cors: {
-    origin: [process.env.REACT_APP_URL || "http://localhost:3000"]
+    origin: process.env.REACT_APP_URL
   }
 })
 
