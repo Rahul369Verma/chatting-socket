@@ -1,6 +1,6 @@
 const io = require("socket.io")(process.env.PORT || 8999, {
   cors: {
-    origin: process.env.REACT_APP_URL
+    origin: process.env.REACT_APP_URL || "http://localhost:3000"
   }
 })
 
@@ -27,19 +27,20 @@ io.on("connection", (socket) => {
     await io.emit("getUsers", users)
   })
 
-  socket.on("sendMessage", async ({ friend, conversationId, senderEmail, receiverEmail, text }) => {
+  socket.on("sendMessage", async ({ _id, conversationId, senderEmail, receiverEmail, text }) => {
     const receiver = await getSocket(receiverEmail)
-    console.log(friend, conversationId, senderEmail, receiverEmail, text)
-    await io.to(receiver?.socketId).emit("getMessage", { friend, conversationId, senderEmail, text })
+    console.log("message Send", conversationId, senderEmail, receiverEmail, text)
+    await io.to(receiver?.socketId).emit("getMessage", { conversationId, senderEmail, text, _id })
   })
 
-  socket.on("messageSeen", async ({ conversationId, senderEmail }) => {
+  socket.on("messageSeen", async ({ _id, senderEmail }) => {
+    console.log("message Seen")
     const receiver = await getSocket(senderEmail)
-    await io.to(receiver?.socketId).emit("getMessageSeen", { conversationId })
+    await io.to(receiver?.socketId).emit("getMessageSeen", { _id })
   })
-  socket.on("messageDelivered", async ({ conversationId, senderEmail }) => {
+  socket.on("messageDelivered", async ({ _id, conversationId, senderEmail }) => {
     const receiver = await getSocket(senderEmail)
-    await io.to(receiver?.socketId).emit("getMessageDelivered", { conversationId })
+    await io.to(receiver?.socketId).emit("getMessageDelivered", { _id, conversationId })
   })
   socket.on("removeFriendRequest", async ({ data }) => {
     const receiver = await getSocket(data.senderEmail)
