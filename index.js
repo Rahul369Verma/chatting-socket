@@ -33,14 +33,14 @@ io.on("connection", (socket) => {
     await io.to(receiver?.socketId).emit("getMessage", { conversationId, senderEmail, text, _id })
   })
 
-  socket.on("messageSeen", async ({ _id, senderEmail }) => {
+  socket.on("messageSeen", async ({ _id,conversationId , senderEmail }) => {
     console.log("message Seen")
     const receiver = await getSocket(senderEmail)
-    await io.to(receiver?.socketId).emit("getMessageSeen", { _id })
+    await io.to(receiver?.socketId).emit("getMessageSeen", { _id, conversationId })
   })
-  socket.on("messageDelivered", async ({ _id, conversationId, senderEmail }) => {
+  socket.on("messageDelivered", async ({ _id, conversationId, senderEmail, all }) => {
     const receiver = await getSocket(senderEmail)
-    await io.to(receiver?.socketId).emit("getMessageDelivered", { _id, conversationId })
+    await io.to(receiver?.socketId).emit("getMessageDelivered", { _id, conversationId, all })
   })
   socket.on("removeFriendRequest", async ({ data }) => {
     const receiver = await getSocket(data.senderEmail)
@@ -56,9 +56,9 @@ io.on("connection", (socket) => {
     await io.to(receiver?.socketId).emit("FriendRequest", { data })
   })
 
-  socket.on("typing", async ({ messageConversation, friendData }) => {
+  socket.on("typing", async ({ messageConversationId, friendData }) => {
       const receiver = await getSocket(friendData?.email)
-    await io.to(receiver?.socketId).emit("typing", { messageConversation })
+    await io.to(receiver?.socketId).emit("typing", { messageConversationId })
   })
 
 
