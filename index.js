@@ -23,17 +23,19 @@ io.on("connection", (socket) => {
   console.log("a user connected")
   io.emit("welcome", "hello this is socket server")
   socket.on("addUser", async (userEmail) => {
-    addUser(userEmail, socket.id)
+    await addUser(userEmail, socket.id)
+    console.log(users)
     await io.emit("getUsers", users)
   })
 
   socket.on("sendMessage", async ({ _id, conversationId, senderEmail, receiverEmail, text }) => {
+    console.log(users)
     const receiver = await getSocket(receiverEmail)
     console.log("message Send", conversationId, senderEmail, receiverEmail, text)
     await io.to(receiver?.socketId).emit("getMessage", { conversationId, senderEmail, text, _id })
   })
 
-  socket.on("messageSeen", async ({ _id,conversationId , senderEmail }) => {
+  socket.on("messageSeen", async ({ _id, conversationId, senderEmail }) => {
     console.log("message Seen")
     const receiver = await getSocket(senderEmail)
     await io.to(receiver?.socketId).emit("getMessageSeen", { _id, conversationId })
@@ -46,7 +48,7 @@ io.on("connection", (socket) => {
     const receiver = await getSocket(data.senderEmail)
     await io.to(receiver?.socketId).emit("FriendRequest", { data })
   })
-  socket.on("notification", async ( {email} ) => {
+  socket.on("notification", async ({ email }) => {
     const receiver = await getSocket(email)
     await io.to(receiver?.socketId).emit("notification")
   })
@@ -57,7 +59,7 @@ io.on("connection", (socket) => {
   })
 
   socket.on("typing", async ({ messageConversationId, friendData }) => {
-      const receiver = await getSocket(friendData?.email)
+    const receiver = await getSocket(friendData?.email)
     await io.to(receiver?.socketId).emit("typing", { messageConversationId })
   })
 
